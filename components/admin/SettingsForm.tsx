@@ -1,13 +1,21 @@
 "use client";
 
 import { useActionState } from "react";
+import ImageUploader from "./ImageUploader";
 import { saveSettings, type AdminState } from "@/app/admin/actions";
 
 type S = {
   store_name: string; store_sub: string; hero_title: string; hero_text: string; whatsapp: string; currency: string;
   default_moq: number; min_wholesale_order: number; delivery_fee: number; free_delivery_over: number | null;
   jazzcash_number: string; jazzcash_title: string; easypaisa_number: string; easypaisa_title: string; bank_details: string;
+  hero_image: string; instagram: string; address: string; theme: "gold" | "emerald" | "rose";
 };
+
+const THEMES: { id: "gold" | "emerald" | "rose"; name: string; note: string; swatch: [string, string, string] }[] = [
+  { id: "gold", name: "Black and gold", note: "Premium, bridal feel", swatch: ["#15110f", "#c9a45c", "#f1e8d8"] },
+  { id: "emerald", name: "Cream and green", note: "Light, clean, traditional", swatch: ["#f6f1e6", "#1b5e46", "#1f2a24"] },
+  { id: "rose", name: "White and rose gold", note: "Soft, modern, for ladies", swatch: ["#fbf7f5", "#b76e79", "#2a2024"] },
+];
 
 function F({ id, label, hint, children }: { id: string; label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -21,9 +29,31 @@ export default function SettingsForm({ s }: { s: S }) {
     <form action={action} className="grid max-w-3xl gap-4 sm:grid-cols-2">
       <F id="store_name" label="Store name"><input id="store_name" name="store_name" className="input" defaultValue={s.store_name} required maxLength={40} /></F>
       <F id="store_sub" label="Line under the name"><input id="store_sub" name="store_sub" className="input" defaultValue={s.store_sub} maxLength={40} /></F>
+      <h2 className="mt-2 text-sm font-semibold text-gold sm:col-span-2">Look of the shop</h2>
+      <fieldset className="sm:col-span-2">
+        <legend className="label">Colour theme</legend>
+        <div className="grid gap-2.5 sm:grid-cols-3">
+          {THEMES.map((t) => (
+            <label key={t.id} className="flex cursor-pointer items-center gap-3 rounded-[10px] border border-line bg-panel p-3 has-[:checked]:border-gold">
+              <input type="radio" name="theme" value={t.id} defaultChecked={s.theme === t.id} className="accent-gold" />
+              <span className="flex shrink-0 overflow-hidden rounded-full border border-line">
+                {t.swatch.map((c) => <i key={c} className="block h-6 w-4" style={{ background: c }} />)}
+              </span>
+              <span className="min-w-0 text-sm leading-tight">{t.name}<span className="block text-xs text-muted">{t.note}</span></span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div className="sm:col-span-2">
+        <span className="label">Homepage banner photo (optional)</span>
+        <ImageUploader name="hero_image" single initial={s.hero_image ? [s.hero_image] : []} />
+        <p className="note mt-1">A wide photo works best (landscape). Without one, a dark gold background is shown. Press Save settings after uploading.</p>
+      </div>
       <div className="sm:col-span-2"><F id="hero_title" label="Homepage headline"><input id="hero_title" name="hero_title" className="input" defaultValue={s.hero_title} maxLength={120} /></F></div>
       <div className="sm:col-span-2"><F id="hero_text" label="Homepage text"><input id="hero_text" name="hero_text" className="input" defaultValue={s.hero_text} maxLength={220} /></F></div>
       <F id="whatsapp" label="WhatsApp number" hint="Orders and chat links go here. 03xx or 92xx format both work."><input id="whatsapp" name="whatsapp" type="tel" className="input" defaultValue={s.whatsapp} /></F>
+      <F id="instagram" label="Instagram (optional)" hint="Your username or full link. Shown in the footer."><input id="instagram" name="instagram" className="input" defaultValue={s.instagram} maxLength={120} placeholder="@alhayatjewellery" /></F>
+      <F id="address" label="Shop address (optional)" hint="Shown in the footer."><input id="address" name="address" className="input" defaultValue={s.address} maxLength={200} /></F>
       <F id="currency" label="Currency label"><input id="currency" name="currency" className="input" defaultValue={s.currency} maxLength={6} /></F>
       <F id="default_moq" label="Default minimum quantity (wholesale)" hint="Used for every product without its own minimum."><input id="default_moq" name="default_moq" type="number" min={1} step={1} className="input" defaultValue={s.default_moq} required /></F>
       <F id="min_wholesale_order" label="Minimum wholesale order amount" hint="0 means no minimum."><input id="min_wholesale_order" name="min_wholesale_order" type="number" min={0} step="any" className="input" defaultValue={s.min_wholesale_order} required /></F>

@@ -5,8 +5,8 @@ const TONES: Record<string, { a: string; b: string; m: string; m2: string }> = {
 };
 
 export function toneBg(tone: string): string {
-  const t = TONES[tone] ?? TONES.gold;
-  return `radial-gradient(circle at 50% 35%, ${t.a}, ${t.b})`;
+  const k = tone in TONES ? tone : "gold";
+  return `radial-gradient(circle at 50% 35%, var(--art-a-${k}), var(--art-b-${k}))`;
 }
 
 /** Drawn placeholder shown when a product has no photo yet. */

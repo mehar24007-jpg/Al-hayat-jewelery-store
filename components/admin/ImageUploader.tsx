@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cld } from "@/lib/format";
 
-export default function ImageUploader({ initial }: { initial: string[] }) {
+export default function ImageUploader({ initial, name = "images", single = false }: { initial: string[]; name?: string; single?: boolean }) {
   const [images, setImages] = useState<string[]>(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -26,7 +26,7 @@ export default function ImageUploader({ initial }: { initial: string[] }) {
         const r = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloud}/image/upload`, { method: "POST", body });
         const out = await r.json();
         if (!r.ok) throw new Error(out?.error?.message || "Cloudinary refused the upload.");
-        setImages((cur) => [...cur, out.secure_url as string]);
+        setImages((cur) => (single ? [out.secure_url as string] : [...cur, out.secure_url as string]));
       }
     } catch (e: any) {
       setError(e?.message || "Upload failed.");
@@ -45,7 +45,7 @@ export default function ImageUploader({ initial }: { initial: string[] }) {
 
   return (
     <div className="grid gap-3">
-      <input type="hidden" name="images" value={JSON.stringify(images)} />
+      <input type="hidden" name={name} value={JSON.stringify(images)} />
       <div className="flex flex-wrap gap-3">
         {images.map((u, i) => (
           <div key={u} className="w-24">
@@ -63,11 +63,11 @@ export default function ImageUploader({ initial }: { initial: string[] }) {
         ))}
       </div>
       <label className="btn w-fit cursor-pointer">
-        {busy ? "Uploading" : "Upload photos"}
-        <input type="file" accept="image/*" multiple className="hidden" disabled={busy} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
+        {busy ? "Uploading" : single ? "Upload photo" : "Upload photos"}
+        <input type="file" accept="image/*" multiple={!single} className="hidden" disabled={busy} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
       </label>
       {error && <p className="err" role="alert">{error}</p>}
-      <p className="note">The first photo is the main one. Photos are stored on Cloudinary.</p>
+      {!single && <p className="note">The first photo is the main one. The second photo shows when someone hovers over the card. Photos are stored on Cloudinary.</p>}
     </div>
   );
 }

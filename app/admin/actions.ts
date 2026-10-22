@@ -216,6 +216,16 @@ export async function deleteReview(id: string) {
 }
 
 /* ---------- settings ---------- */
+/** The uploader sends a JSON list of image links; the homepage banner uses the first one. */
+function heroImage(v: FormDataEntryValue | null): string {
+  try {
+    const a = JSON.parse(String(v ?? "[]"));
+    return Array.isArray(a) && typeof a[0] === "string" && a[0].startsWith("https://") ? a[0] : "";
+  } catch {
+    return "";
+  }
+}
+
 export async function saveSettings(_prev: AdminState, fd: FormData): Promise<AdminState> {
   const { sb } = await requireAdmin();
   const moq = Math.floor(num(fd.get("default_moq")));
@@ -242,6 +252,10 @@ export async function saveSettings(_prev: AdminState, fd: FormData): Promise<Adm
     easypaisa_number: text(fd.get("easypaisa_number")),
     easypaisa_title: text(fd.get("easypaisa_title")),
     bank_details: text(fd.get("bank_details")),
+    hero_image: heroImage(fd.get("hero_image")),
+    instagram: text(fd.get("instagram")),
+    address: text(fd.get("address")),
+    theme: ["gold", "emerald", "rose"].includes(text(fd.get("theme"))) ? text(fd.get("theme")) : "gold",
   }).eq("id", 1);
   if (error) return { error: error.message };
   revalidatePath("/", "layout");

@@ -8,10 +8,11 @@ export default async function Home() {
   const { sb, user, profile } = await getSession();
   const isDealer = profile?.dealer_status === "approved";
 
-  const [cats, prods, ratings] = await Promise.all([
+  const [cats, prods, ratings, bestRes] = await Promise.all([
     sb.from("categories").select("name").order("sort_order").order("name"),
-    sb.from("products").select("id,slug,name,retail_price,tag,tone,images,stock,category:categories(name)").eq("is_active", true).order("created_at"),
+    sb.from("products").select("id,slug,name,retail_price,tag,tone,images,stock,created_at,category:categories(name)").eq("is_active", true).order("created_at"),
     sb.from("product_ratings").select("product_id,avg_rating,review_count"),
+    sb.rpc("best_sellers", { p_limit: 8 }),
   ]);
 
   const rating = new Map<string, { avg: number; n: number }>();
@@ -44,11 +45,28 @@ export default async function Home() {
       tag: p.tag,
       tone: p.tone,
       image: p.images?.[0] ?? null,
+      image2: p.images?.[1] ?? null,
       stock: p.stock,
       rating: r?.avg ?? null,
       reviews: r?.n ?? 0,
     };
   });
 
-  return <Catalog products={products} categories={(cats.data ?? []).map((c: any) => c.name)} />;
+  // Newest 8 pieces (the list above is oldest first), and a photo for each category card.
+  const newIds = products.slice(-8).reverse().map((p) => p.id);
+  const bestIds = ((bestRes.data ?? []) as { product_id: string }[]).map((r) => r.product_id);
+  const categoryImages: Record<string, string | null> = {};
+  products.forEach((p) => {
+    if (p.image && !categoryImages[p.category]) categoryImages[p.category] = p.image;
+  });
+
+  return (
+    <Catalog
+      products={products}
+      categories={(cats.data ?? []).map((c: any) => c.name)}
+      categoryImages={categoryImages}
+      newIds={newIds}
+      bestIds={bestIds}
+    />
+  );
 }

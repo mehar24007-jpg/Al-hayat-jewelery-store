@@ -16,6 +16,8 @@ export default async function AdminSettings({ searchParams }: { searchParams: Pr
           default_moq: s.default_moq, min_wholesale_order: Number(s.min_wholesale_order), delivery_fee: Number(s.delivery_fee),
           free_delivery_over: s.free_delivery_over == null ? null : Number(s.free_delivery_over),
           jazzcash_number: s.jazzcash_number, jazzcash_title: s.jazzcash_title, easypaisa_number: s.easypaisa_number, easypaisa_title: s.easypaisa_title, bank_details: s.bank_details,
+          hero_image: s.hero_image ?? "", instagram: s.instagram ?? "", address: s.address ?? "",
+          theme: ["gold", "emerald", "rose"].includes(s.theme) ? s.theme : "gold",
         }}
       />
     </div>

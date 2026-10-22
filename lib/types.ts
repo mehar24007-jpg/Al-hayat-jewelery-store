@@ -14,6 +14,10 @@ export type Settings = {
   easypaisa_number: string;
   easypaisa_title: string;
   bank_details: string;
+  hero_image: string;
+  instagram: string;
+  address: string;
+  theme: "gold" | "emerald" | "rose";
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -32,6 +36,10 @@ export const DEFAULT_SETTINGS: Settings = {
   easypaisa_number: "",
   easypaisa_title: "",
   bank_details: "",
+  hero_image: "",
+  instagram: "",
+  address: "",
+  theme: "gold",
 };
 
 export type Profile = {
@@ -56,6 +64,7 @@ export type CatalogProduct = {
   tag: string | null;
   tone: "gold" | "rose" | "silver";
   image: string | null;
+  image2: string | null;
   stock: number;
   rating: number | null;
   reviews: number;

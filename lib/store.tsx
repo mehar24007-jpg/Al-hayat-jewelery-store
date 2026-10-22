@@ -19,6 +19,10 @@ type Ctx = {
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
   clear: () => void;
+  cartOpen: boolean;
+  setCartOpen: (v: boolean) => void;
+  wish: string[];
+  toggleWish: (id: string) => void;
 };
 
 const StoreCtx = createContext<Ctx | null>(null);
@@ -44,6 +48,25 @@ export function StoreProvider({
   const [mode, setModeState] = useState<Mode>("retail");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [wish, setWish] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const w = JSON.parse(localStorage.getItem("ah_wish") || "[]");
+      if (Array.isArray(w)) setWish(w.filter((x) => typeof x === "string"));
+    } catch {}
+  }, []);
+
+  const toggleWish = useCallback((id: string) => {
+    setWish((w) => {
+      const n = w.includes(id) ? w.filter((x) => x !== id) : [...w, id];
+      try {
+        localStorage.setItem("ah_wish", JSON.stringify(n));
+      } catch {}
+      return n;
+    });
+  }, []);
 
   useEffect(() => {
     try {
@@ -101,8 +124,12 @@ export function StoreProvider({
       setQty,
       remove,
       clear,
+      cartOpen,
+      setCartOpen,
+      wish,
+      toggleWish,
     }),
-    [settings, profile, email, isDealer, mode, setMode, cart, add, setQty, remove, clear]
+    [settings, profile, email, isDealer, mode, setMode, cart, add, setQty, remove, clear, cartOpen, wish, toggleWish]
   );
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;

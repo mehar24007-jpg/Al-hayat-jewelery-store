@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import CartDrawer from "@/components/CartDrawer";
+import BottomNav from "@/components/BottomNav";
 import { StoreProvider } from "@/lib/store";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_SETTINGS, type Profile, type Settings } from "@/lib/types";
@@ -24,6 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         min_wholesale_order: Number(s.min_wholesale_order),
         delivery_fee: Number(s.delivery_fee),
         free_delivery_over: s.free_delivery_over == null ? null : Number(s.free_delivery_over),
+        theme: ["gold", "emerald", "rose"].includes(s.theme) ? s.theme : "gold",
       }
     : DEFAULT_SETTINGS;
 
@@ -37,11 +41,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-ink font-body text-[15px] leading-relaxed text-cream">
+    <html lang="en" data-theme={settings.theme} className={`${display.variable} ${body.variable}`}>
+      <body className="min-h-screen bg-ink pb-16 font-body text-[15px] leading-relaxed text-cream md:pb-0">
         <StoreProvider settings={settings} profile={profile} email={user?.email ?? null}>
           <Header />
           {children}
+          <Footer />
+          <CartDrawer />
+          <BottomNav />
         </StoreProvider>
       </body>
     </html>

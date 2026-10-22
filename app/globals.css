@@ -2,16 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+/* Colour themes. Values are "R G B" so Tailwind can add opacity. The owner picks one in Admin, Settings. */
+:root,
+:root[data-theme="gold"] {
+  color-scheme: dark;
+  --ink: 21 17 15;
+  --panel: 30 25 22;
+  --panel2: 39 32 25;
+  --line: 58 48 39;
+  --cream: 241 232 216;
+  --muted: 169 156 136;
+  --gold: 201 164 92;
+  --gold-soft: 227 201 143;
+  --on-gold: 26 19 8;
+  --warn: 224 131 107;
+  --ok: 143 191 154;
+  --art-a-gold: #3a2d1c; --art-b-gold: #241b12;
+  --art-a-rose: #3b2823; --art-b-rose: #261a17;
+  --art-a-silver: #2b2f33; --art-b-silver: #1b1e21;
+}
 
-html, body { background: #15110f; }
+:root[data-theme="emerald"] {
+  color-scheme: light;
+  --ink: 246 241 230;
+  --panel: 255 252 245;
+  --panel2: 239 231 212;
+  --line: 221 210 184;
+  --cream: 31 42 36;
+  --muted: 105 116 106;
+  --gold: 27 94 70;
+  --gold-soft: 36 112 84;
+  --on-gold: 255 255 255;
+  --warn: 180 73 47;
+  --ok: 47 122 79;
+  --art-a-gold: #f3ead2; --art-b-gold: #e6d9b8;
+  --art-a-rose: #f6e3dc; --art-b-rose: #ecd2c8;
+  --art-a-silver: #e9ecea; --art-b-silver: #d8ddda;
+}
+
+:root[data-theme="rose"] {
+  color-scheme: light;
+  --ink: 251 247 245;
+  --panel: 255 255 255;
+  --panel2: 246 236 232;
+  --line: 232 216 209;
+  --cream: 42 32 36;
+  --muted: 130 112 112;
+  --gold: 183 110 121;
+  --gold-soft: 156 82 94;
+  --on-gold: 255 255 255;
+  --warn: 190 80 70;
+  --ok: 52 128 90;
+  --art-a-gold: #f8ece6; --art-b-gold: #f0dcd2;
+  --art-a-rose: #fae6e8; --art-b-rose: #f2d3d8;
+  --art-a-silver: #eef0f2; --art-b-silver: #e0e4e8;
+}
+
+html, body { background: rgb(var(--ink)); }
 body { -webkit-font-smoothing: antialiased; }
-:focus-visible { outline: 2px solid #c9a45c; outline-offset: 2px; }
+:focus-visible { outline: 2px solid rgb(var(--gold)); outline-offset: 2px; }
 
 @layer components {
   .wrap { @apply mx-auto w-full max-w-[1240px] px-4; }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-[10px] border border-line bg-panel px-4 py-2.5 text-sm font-medium text-cream transition hover:border-gold disabled:cursor-not-allowed disabled:opacity-45; }
-  .btn-gold { @apply border-gold bg-gold text-on-gold hover:bg-gold-soft; }
+  .btn-gold { @apply border-gold bg-gold text-on-gold hover:opacity-90; }
   .btn-danger { @apply border-warn text-warn hover:bg-warn hover:text-ink; }
   .btn-sm { @apply px-3 py-1.5 text-[13px]; }
   .input { @apply w-full min-w-0 rounded-[10px] border border-line bg-panel px-3 py-2.5 text-cream placeholder:text-muted; }
@@ -21,10 +75,33 @@ body { -webkit-font-smoothing: antialiased; }
   .note { @apply text-[13px] text-muted; }
   .err { @apply text-[13.5px] text-warn; }
   .pill { @apply inline-block rounded-full border border-line px-2.5 py-0.5 text-xs text-muted; }
+  .section-title { @apply font-display text-[28px] font-semibold leading-tight sm:text-[34px]; }
+}
+
+/* Soft entrance and hover motion. Switched off for people who ask for less motion. */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+.reveal { animation: fade-up .6s cubic-bezier(.2,.7,.2,1) both; }
+.reveal-2 { animation-delay: .08s; }
+.reveal-3 { animation-delay: .16s; }
+.pop { animation: pop .35s ease; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .pop { animation: none; }
+  * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
 
 @media print {
-  header, .no-print { display: none !important; }
+  header, footer, nav, .no-print { display: none !important; }
   body, html { background: #fff !important; color: #000 !important; }
   .invoice { border: 0 !important; background: #fff !important; color: #000 !important; }
   .invoice * { color: #000 !important; border-color: #999 !important; }

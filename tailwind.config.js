@@ -1,20 +1,22 @@
 /** @type {import('tailwindcss').Config} */
+const c = (name) => `rgb(var(--${name}) / <alpha-value>)`;
+
 module.exports = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./lib/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        ink: "#15110f",
-        panel: "#1e1916",
-        panel2: "#272019",
-        line: "#3a3027",
-        cream: "#f1e8d8",
-        muted: "#a99c88",
-        gold: "#c9a45c",
-        "gold-soft": "#e3c98f",
-        "on-gold": "#1a1308",
-        warn: "#e0836b",
-        ok: "#8fbf9a",
+        ink: c("ink"),
+        panel: c("panel"),
+        panel2: c("panel2"),
+        line: c("line"),
+        cream: c("cream"),
+        muted: c("muted"),
+        gold: c("gold"),
+        "gold-soft": c("gold-soft"),
+        "on-gold": c("on-gold"),
+        warn: c("warn"),
+        ok: c("ok"),
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
