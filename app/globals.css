@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html, body { background: #15110f; }
+body { -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid #c9a45c; outline-offset: 2px; }
+
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-[1240px] px-4; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-[10px] border border-line bg-panel px-4 py-2.5 text-sm font-medium text-cream transition hover:border-gold disabled:cursor-not-allowed disabled:opacity-45; }
+  .btn-gold { @apply border-gold bg-gold text-on-gold hover:bg-gold-soft; }
+  .btn-danger { @apply border-warn text-warn hover:bg-warn hover:text-ink; }
+  .btn-sm { @apply px-3 py-1.5 text-[13px]; }
+  .input { @apply w-full min-w-0 rounded-[10px] border border-line bg-panel px-3 py-2.5 text-cream placeholder:text-muted; }
+  .label { @apply mb-1.5 block text-[13px] text-muted; }
+  .card { @apply rounded-[14px] border border-line bg-panel; }
+  .h-display { @apply font-display font-semibold; }
+  .note { @apply text-[13px] text-muted; }
+  .err { @apply text-[13.5px] text-warn; }
+  .pill { @apply inline-block rounded-full border border-line px-2.5 py-0.5 text-xs text-muted; }
+}
+
+@media print {
+  header, .no-print { display: none !important; }
+  body, html { background: #fff !important; color: #000 !important; }
+  .invoice { border: 0 !important; background: #fff !important; color: #000 !important; }
+  .invoice * { color: #000 !important; border-color: #999 !important; }
+}
