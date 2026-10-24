@@ -88,15 +88,36 @@ body { -webkit-font-smoothing: antialiased; }
   40% { transform: scale(1.28); }
   100% { transform: scale(1); }
 }
-.reveal { animation: fade-up .6s cubic-bezier(.2,.7,.2,1) both; }
+/* "backwards" (not "both") so the finished animation does not lock out hover and zoom transforms. */
+.reveal { animation: fade-up .6s cubic-bezier(.2,.7,.2,1) backwards; }
 .reveal-2 { animation-delay: .08s; }
 .reveal-3 { animation-delay: .16s; }
 .pop { animation: pop .35s ease; }
+
+@keyframes img-swap {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: none; }
+}
+.img-swap { animation: img-swap .45s ease backwards; }
+
+/* Slow drift on the homepage banner photo. */
+@keyframes kenburns {
+  from { transform: scale(1); }
+  to { transform: scale(1.09); }
+}
+.kenburns { animation: kenburns 22s ease-in-out infinite alternate; }
+
+/* Photos sharpen from a soft blur once loaded (see FadeImg). */
+img[data-load="0"] { filter: blur(14px); }
+img[data-load="1"] { filter: blur(0); }
+/* Images that already carry a Tailwind transition keep it (it includes filter); the rest get one here. */
+img[data-load="1"]:not([class*="transition"]) { transition: filter .7s ease; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .pop { animation: none; }
+  .reveal, .pop, .img-swap, .kenburns { animation: none; }
+  img[data-load="0"] { filter: none; }
   * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import FadeImg from "./FadeImg";
 import ProductArt, { toneBg } from "./ProductArt";
 import { cld, money } from "@/lib/format";
 import { useStore } from "@/lib/store";
@@ -44,14 +45,13 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
   }
 
   return (
-    <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-[14px] border border-line bg-panel transition duration-300 hover:-translate-y-1 hover:border-gold hover:shadow-xl">
+    <article className="reveal group relative flex min-w-0 flex-col overflow-hidden rounded-[14px] border border-line bg-panel transition duration-300 hover:-translate-y-1 hover:border-gold hover:shadow-xl">
       <Link href={`/product/${p.slug}`} className="relative grid aspect-square place-items-center overflow-hidden" style={{ background: toneBg(p.tone) }}>
         {img ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <FadeImg
             src={img}
             alt={p.name}
-            className={`h-full w-full object-cover transition duration-500 ${img2 ? "group-hover:opacity-0" : "group-hover:scale-105"}`}
+            className={`h-full w-full object-cover transition duration-500 ${img2 ? "group-hover:opacity-0" : "group-hover:scale-110"}`}
             loading="lazy"
           />
         ) : (

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import ProductArt, { toneBg } from "./ProductArt";
+import Gallery from "./Gallery";
 import { Stars } from "./ProductCard";
-import { cld, money } from "@/lib/format";
+import { money } from "@/lib/format";
 import { useStore } from "@/lib/store";
 
 type Props = {
@@ -27,7 +27,6 @@ export default function ProductView(p: Props) {
   const wholesale = mode === "wholesale" && p.wholesale != null;
   const moq = wholesale ? p.wholesale!.moq ?? settings.default_moq : 1;
   const [qty, setQty] = useState<number | null>(null);
-  const [active, setActive] = useState(0);
   const [done, setDone] = useState(false);
   const q = Math.max(qty ?? moq, moq);
   const soldOut = p.stock <= 0;
@@ -35,31 +34,10 @@ export default function ProductView(p: Props) {
   const base = wholesale ? p.wholesale!.special ?? p.wholesale!.price * (1 - (profile?.dealer_discount_pct ?? 0) / 100) : p.retail;
   const slab = wholesale && p.wholesale!.special == null ? [...p.slabs].filter((s) => s.min_qty <= q).sort((a, b) => b.min_qty - a.min_qty)[0] : undefined;
   const unit = slab ? slab.unit_price : base;
-  const img = cld(p.images[active], 900);
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
-      <div className="min-w-0">
-        <div className="relative grid aspect-square place-items-center overflow-hidden rounded-[14px] border border-line" style={{ background: toneBg(p.tone) }}>
-          {img ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={img} alt={p.name} className="h-full w-full object-cover" />
-          ) : (
-            <ProductArt tone={p.tone} category={p.category} id={p.id} />
-          )}
-          {p.tag && <span className="absolute left-3 top-3 rounded-full border border-line bg-ink/80 px-2.5 py-0.5 text-xs uppercase tracking-wide text-gold-soft">{p.tag}</span>}
-        </div>
-        {p.images.length > 1 && (
-          <div className="mt-3 flex gap-2 overflow-x-auto">
-            {p.images.map((u, i) => (
-              <button key={u} onClick={() => setActive(i)} aria-label={`Photo ${i + 1}`} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border ${i === active ? "border-gold" : "border-line"}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cld(u, 160) ?? u} alt="" className="h-full w-full object-cover" />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      <Gallery images={p.images} name={p.name} tone={p.tone} category={p.category} id={p.id} tag={p.tag} />
 
       <div className="grid content-start gap-4">
         <div>

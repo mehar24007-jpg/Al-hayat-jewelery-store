@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import FadeImg from "./FadeImg";
 import ProductArt, { toneBg } from "./ProductArt";
 import ProductCard from "./ProductCard";
 import { cld, money, waNumber } from "@/lib/format";
@@ -74,8 +75,7 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
       {/* Hero */}
       <section className="relative isolate overflow-hidden">
         {hero ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={hero} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+          <FadeImg src={hero} alt="" className="kenburns absolute inset-0 -z-20 h-full w-full object-cover" />
         ) : (
           <div
             className="absolute inset-0 -z-20"
@@ -138,8 +138,7 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
                     style={{ background: toneBg("gold") }}
                   >
                     {img ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={img} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+                      <FadeImg src={img} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
                     ) : (
                       <div className="grid h-full w-full place-items-center">
                         <ProductArt tone="gold" category={c} id={`cat-${c}`} />
