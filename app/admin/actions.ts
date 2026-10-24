@@ -39,6 +39,8 @@ export async function saveProduct(id: string | null, _prev: AdminState, fd: Form
   const cmpRaw = text(fd.get("compare_at_price"));
   const compare = cmpRaw === "" ? null : Number(cmpRaw);
   if (compare !== null && !(compare > retail)) return { error: "The old price must be higher than the retail price, or leave it empty." };
+  const vRaw = text(fd.get("video_url"));
+  const videoUrl = vRaw.startsWith("https://res.cloudinary.com/") ? vRaw : null;
   const sizes = Array.from(new Set(text(fd.get("sizes")).split(/[,\n]/).map((x) => x.trim()).filter(Boolean))).slice(0, 20);
 
   let images: string[] = [];
@@ -67,6 +69,7 @@ export async function saveProduct(id: string | null, _prev: AdminState, fd: Form
     images,
     compare_at_price: compare,
     sizes,
+    video_url: videoUrl,
   };
 
   let pid = id;

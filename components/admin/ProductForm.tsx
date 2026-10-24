@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import ImageUploader from "./ImageUploader";
+import VideoUploader from "./VideoUploader";
 import { saveProduct, type AdminState } from "@/app/admin/actions";
 
 type Product = {
@@ -20,6 +21,7 @@ type Product = {
   slabs: { min_qty: number; unit_price: number }[];
   compare_at_price: number | "";
   sizes: string;
+  video_url: string;
 };
 
 export default function ProductForm({ product, categories, defaultMoq }: { product: Product; categories: { id: string; name: string }[]; defaultMoq: number }) {
@@ -29,6 +31,7 @@ export default function ProductForm({ product, categories, defaultMoq }: { produ
   return (
     <form action={action} className="grid gap-5">
       <div><span className="label">Photos</span><ImageUploader initial={product.images} /></div>
+      <div><span className="label">Video (optional)</span><VideoUploader initial={product.video_url} /></div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">

@@ -48,6 +48,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
           is_active: p?.is_active ?? true,
           images: p?.images ?? [],
           compare_at_price: p?.compare_at_price == null ? "" : Number(p.compare_at_price),
+          video_url: p?.video_url ?? "",
           sizes: (p?.sizes ?? []).join(", "),
           slabs: slabs.map((s) => ({ min_qty: s.min_qty, unit_price: Number(s.unit_price) })),
         }}

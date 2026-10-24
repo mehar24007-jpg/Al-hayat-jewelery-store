@@ -16,7 +16,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const { data: p } = await sb
     .from("products")
-    .select("id,category_id,name,description,retail_price,compare_at_price,sizes,tag,tone,images,stock,category:categories(name)")
+    .select("id,category_id,name,description,retail_price,compare_at_price,sizes,video_url,tag,tone,images,stock,category:categories(name)")
     .eq("slug", slug)
     .eq("is_active", true)
     .maybeSingle();
@@ -72,6 +72,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         tag={p.tag}
         tone={p.tone}
         images={p.images ?? []}
+        video={p.video_url ?? null}
         stock={p.stock}
         rating={rating.data ? Number((rating.data as any).avg_rating) : null}
         reviews={rating.data ? (rating.data as any).review_count : 0}

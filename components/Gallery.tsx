@@ -5,18 +5,24 @@ import FadeImg from "./FadeImg";
 import ProductArt, { toneBg } from "./ProductArt";
 import { cld } from "@/lib/format";
 
-type Props = { images: string[]; name: string; tone: string; category: string; id: string; tag: string | null };
+type Props = { images: string[]; name: string; tone: string; category: string; id: string; tag: string | null; video?: string | null };
+
+/** Cloudinary video: let it pick the best format and quality, and make a still poster from the first frame. */
+const vidSrc = (u: string) => (u.includes("/video/upload/") ? u.replace("/video/upload/", "/video/upload/f_auto:video,q_auto/") : u);
+const vidPoster = (u: string) => (u.includes("/video/upload/") ? u.replace("/video/upload/", "/video/upload/so_0,w_300,f_jpg/").replace(/\.[a-z0-9]+$/i, ".jpg") : undefined);
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /** Product photos: hover to magnify on a computer, tap for a full screen viewer with pinch, double tap and swipe. */
-export default function Gallery({ images, name, tone, category, id, tag }: Props) {
+export default function Gallery({ images, name, tone, category, id, tag, video }: Props) {
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
-  const has = images.length > 0;
+  const total = images.length + (video ? 1 : 0);
+  const isVideo = !!video && active === images.length;
+  const has = images.length > 0 && !isVideo;
   const src = has ? cld(images[active], 1000) : null;
-  const many = images.length > 1;
+  const many = total > 1;
 
   function onMove(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType !== "mouse") return;
@@ -24,7 +30,7 @@ export default function Gallery({ images, name, tone, category, id, tag }: Props
     setHover({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
   }
 
-  const step = (d: number) => setActive((c) => (c + d + images.length) % images.length);
+  const step = (d: number) => setActive((c) => (c + d + total) % total);
 
   return (
     <div className="min-w-0">
@@ -39,7 +45,21 @@ export default function Gallery({ images, name, tone, category, id, tag }: Props
         className={`relative grid aspect-square place-items-center overflow-hidden rounded-[14px] border border-line ${has ? "cursor-zoom-in" : ""}`}
         style={{ background: toneBg(tone) }}
       >
-        {src ? (
+        {isVideo && video ? (
+          <video
+            key={video}
+            src={vidSrc(video)}
+            poster={vidPoster(video)}
+            className="img-swap h-full w-full object-cover"
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label={`${name} video`}
+          />
+        ) : src ? (
           <FadeImg
             key={src}
             src={src}
@@ -51,7 +71,7 @@ export default function Gallery({ images, name, tone, category, id, tag }: Props
         ) : (
           <ProductArt tone={tone} category={category} id={id} />
         )}
-        {tag && <span className="absolute left-3 top-3 rounded-full border border-line bg-ink/80 px-2.5 py-0.5 text-xs uppercase tracking-wide text-gold-soft">{tag}</span>}
+        {tag && !isVideo && <span className="absolute left-3 top-3 rounded-full border border-line bg-ink/80 px-2.5 py-0.5 text-xs uppercase tracking-wide text-gold-soft">{tag}</span>}
         {has && (
           <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-ink/85 px-2.5 py-1 text-xs text-cream backdrop-blur">
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -94,6 +114,18 @@ export default function Gallery({ images, name, tone, category, id, tag }: Props
               <FadeImg src={cld(u, 160) ?? u} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
+          {video && (
+            <button
+              onClick={() => setActive(images.length)}
+              aria-label="Product video"
+              aria-current={isVideo}
+              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-panel2 transition duration-200 hover:-translate-y-0.5 ${isVideo ? "border-gold ring-2 ring-gold/40" : "border-line opacity-80 hover:opacity-100"}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {vidPoster(video) && <img src={vidPoster(video)} alt="" className="h-full w-full object-cover" />}
+              <span className="absolute inset-0 grid place-items-center bg-black/35 text-white" aria-hidden="true">▶</span>
+            </button>
+          )}
         </div>
       )}
 

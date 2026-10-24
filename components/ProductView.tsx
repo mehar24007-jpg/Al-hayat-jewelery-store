@@ -18,6 +18,7 @@ type Props = {
   tag: string | null;
   tone: string;
   images: string[];
+  video?: string | null;
   stock: number;
   rating: number | null;
   reviews: number;
@@ -77,7 +78,7 @@ export default function ProductView(p: Props) {
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
-      <Gallery images={p.images} name={p.name} tone={p.tone} category={p.category} id={p.id} tag={p.tag} />
+      <Gallery images={p.images} name={p.name} tone={p.tone} category={p.category} id={p.id} tag={p.tag} video={p.video} />
 
       <div className="grid content-start gap-4">
         <div>
