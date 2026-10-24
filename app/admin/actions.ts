@@ -36,6 +36,10 @@ export async function saveProduct(id: string | null, _prev: AdminState, fd: Form
   if (wholesale !== null && wholesale > retail) return { error: "Wholesale price is higher than the retail price. Check both." };
   if (moq !== null && !(moq >= 1)) return { error: "Minimum quantity must be 1 or more." };
   if (!(stock >= 0)) return { error: "Enter the stock quantity (0 or more)." };
+  const cmpRaw = text(fd.get("compare_at_price"));
+  const compare = cmpRaw === "" ? null : Number(cmpRaw);
+  if (compare !== null && !(compare > retail)) return { error: "The old price must be higher than the retail price, or leave it empty." };
+  const sizes = Array.from(new Set(text(fd.get("sizes")).split(/[,\n]/).map((x) => x.trim()).filter(Boolean))).slice(0, 20);
 
   let images: string[] = [];
   let slabs: { min_qty: number; unit_price: number }[] = [];
@@ -61,6 +65,8 @@ export async function saveProduct(id: string | null, _prev: AdminState, fd: Form
     stock,
     is_active: fd.get("is_active") === "on",
     images,
+    compare_at_price: compare,
+    sizes,
   };
 
   let pid = id;
@@ -255,6 +261,14 @@ export async function saveSettings(_prev: AdminState, fd: FormData): Promise<Adm
     hero_image: heroImage(fd.get("hero_image")),
     instagram: text(fd.get("instagram")),
     address: text(fd.get("address")),
+    facebook: text(fd.get("facebook")),
+    tiktok: text(fd.get("tiktok")),
+    youtube: text(fd.get("youtube")),
+    announcement: text(fd.get("announcement")),
+    shipping_policy: text(fd.get("shipping_policy")),
+    exchange_policy: text(fd.get("exchange_policy")),
+    care_text: text(fd.get("care_text")),
+    faq: text(fd.get("faq")),
     theme: ["gold", "emerald", "rose"].includes(text(fd.get("theme"))) ? text(fd.get("theme")) : "gold",
   }).eq("id", 1);
   if (error) return { error: error.message };

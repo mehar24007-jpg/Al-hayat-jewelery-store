@@ -9,6 +9,8 @@ type S = {
   default_moq: number; min_wholesale_order: number; delivery_fee: number; free_delivery_over: number | null;
   jazzcash_number: string; jazzcash_title: string; easypaisa_number: string; easypaisa_title: string; bank_details: string;
   hero_image: string; instagram: string; address: string; theme: "gold" | "emerald" | "rose";
+  facebook: string; tiktok: string; youtube: string; announcement: string;
+  shipping_policy: string; exchange_policy: string; care_text: string; faq: string;
 };
 
 const THEMES: { id: "gold" | "emerald" | "rose"; name: string; note: string; swatch: [string, string, string] }[] = [
@@ -53,12 +55,41 @@ export default function SettingsForm({ s }: { s: S }) {
       <div className="sm:col-span-2"><F id="hero_text" label="Homepage text"><input id="hero_text" name="hero_text" className="input" defaultValue={s.hero_text} maxLength={220} /></F></div>
       <F id="whatsapp" label="WhatsApp number" hint="Orders and chat links go here. 03xx or 92xx format both work."><input id="whatsapp" name="whatsapp" type="tel" className="input" defaultValue={s.whatsapp} /></F>
       <F id="instagram" label="Instagram (optional)" hint="Your username or full link. Shown in the footer."><input id="instagram" name="instagram" className="input" defaultValue={s.instagram} maxLength={120} placeholder="@alhayatjewellery" /></F>
+      <F id="facebook" label="Facebook (optional)"><input id="facebook" name="facebook" className="input" defaultValue={s.facebook} maxLength={120} placeholder="page name or link" /></F>
+      <F id="tiktok" label="TikTok (optional)"><input id="tiktok" name="tiktok" className="input" defaultValue={s.tiktok} maxLength={120} placeholder="@username" /></F>
+      <F id="youtube" label="YouTube (optional)"><input id="youtube" name="youtube" className="input" defaultValue={s.youtube} maxLength={120} placeholder="@channel" /></F>
       <F id="address" label="Shop address (optional)" hint="Shown in the footer."><input id="address" name="address" className="input" defaultValue={s.address} maxLength={200} /></F>
       <F id="currency" label="Currency label"><input id="currency" name="currency" className="input" defaultValue={s.currency} maxLength={6} /></F>
       <F id="default_moq" label="Default minimum quantity (wholesale)" hint="Used for every product without its own minimum."><input id="default_moq" name="default_moq" type="number" min={1} step={1} className="input" defaultValue={s.default_moq} required /></F>
       <F id="min_wholesale_order" label="Minimum wholesale order amount" hint="0 means no minimum."><input id="min_wholesale_order" name="min_wholesale_order" type="number" min={0} step="any" className="input" defaultValue={s.min_wholesale_order} required /></F>
       <F id="delivery_fee" label="Delivery fee"><input id="delivery_fee" name="delivery_fee" type="number" min={0} step="any" className="input" defaultValue={s.delivery_fee} required /></F>
       <F id="free_delivery_over" label="Free delivery above (optional)" hint="Leave empty to always charge the delivery fee."><input id="free_delivery_over" name="free_delivery_over" type="number" min={0} step="any" className="input" defaultValue={s.free_delivery_over ?? ""} /></F>
+      <h2 className="mt-2 text-sm font-semibold text-gold sm:col-span-2">Top bar, policies and questions</h2>
+      <div className="sm:col-span-2">
+        <F id="announcement" label="Top bar messages (optional)" hint="One message per line. Several lines rotate. Empty shows the free delivery message.">
+          <textarea id="announcement" name="announcement" className="input min-h-20" defaultValue={s.announcement} maxLength={400} placeholder={"Free delivery on orders above Rs 3000\nNew bridal sets are here"} />
+        </F>
+      </div>
+      <div className="sm:col-span-2">
+        <F id="shipping_policy" label="Shipping policy" hint="Shown on the product page and the Policies page.">
+          <textarea id="shipping_policy" name="shipping_policy" className="input min-h-24" defaultValue={s.shipping_policy} maxLength={1500} />
+        </F>
+      </div>
+      <div className="sm:col-span-2">
+        <F id="exchange_policy" label="Exchange and returns" hint="For example: exchange within 7 days if unused, in original packing.">
+          <textarea id="exchange_policy" name="exchange_policy" className="input min-h-24" defaultValue={s.exchange_policy} maxLength={1500} />
+        </F>
+      </div>
+      <div className="sm:col-span-2">
+        <F id="care_text" label="Jewellery care" hint="Keep away from water and perfume, store in a box, and so on.">
+          <textarea id="care_text" name="care_text" className="input min-h-20" defaultValue={s.care_text} maxLength={1000} />
+        </F>
+      </div>
+      <div className="sm:col-span-2">
+        <F id="faq" label="Frequently asked questions" hint="Write Q: before the question and A: before the answer. Leave one blank line between questions.">
+          <textarea id="faq" name="faq" className="input min-h-40" defaultValue={s.faq} maxLength={5000} placeholder={"Q: How long does delivery take?\nA: 3 to 5 working days.\n\nQ: Is cash on delivery available?\nA: Yes, all over Pakistan."} />
+        </F>
+      </div>
       <h2 className="mt-2 text-sm font-semibold text-gold sm:col-span-2">Payments customers send to you</h2>
       <p className="note -mt-2 sm:col-span-2">Customers pay to these accounts and type the transaction ID at checkout. You then mark the order as paid. Leave a number empty to hide that option.</p>
       <F id="jazzcash_number" label="JazzCash number"><input id="jazzcash_number" name="jazzcash_number" type="tel" className="input" defaultValue={s.jazzcash_number} placeholder="03xx xxxxxxx" /></F>

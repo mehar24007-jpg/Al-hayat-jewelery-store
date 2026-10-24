@@ -64,7 +64,7 @@ export default async function AdminOrder({ params, searchParams }: { params: Pro
           <thead><tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted"><th className="py-2 font-medium">Item</th><th className="py-2 text-right font-medium">Price</th><th className="py-2 text-right font-medium">Qty</th><th className="py-2 text-right font-medium">Amount</th></tr></thead>
           <tbody>
             {(items ?? []).map((i: any) => (
-              <tr key={i.id} className="border-b border-line"><td className="py-2 [overflow-wrap:anywhere]">{i.product_name}</td><td className="py-2 text-right">{money(i.unit_price)}</td><td className="py-2 text-right">{i.quantity}</td><td className="py-2 text-right">{money(i.line_total)}</td></tr>
+              <tr key={i.id} className="border-b border-line"><td className="py-2 [overflow-wrap:anywhere]">{i.product_name}{i.size ? ` (Size ${i.size})` : ""}</td><td className="py-2 text-right">{money(i.unit_price)}</td><td className="py-2 text-right">{i.quantity}</td><td className="py-2 text-right">{money(i.line_total)}</td></tr>
             ))}
           </tbody>
         </table>

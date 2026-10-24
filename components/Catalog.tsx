@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Faq from "./Faq";
 import FadeImg from "./FadeImg";
 import ProductArt, { toneBg } from "./ProductArt";
 import ProductCard from "./ProductCard";
@@ -10,6 +11,9 @@ import { useStore } from "@/lib/store";
 import type { CatalogProduct } from "@/lib/types";
 
 const SAVED = "__saved";
+const SALE = "__sale";
+
+export type ReviewItem = { id: string; rating: number; comment: string; name: string; product?: string; slug?: string };
 
 type Props = {
   products: CatalogProduct[];
@@ -17,20 +21,40 @@ type Props = {
   categoryImages: Record<string, string | null>;
   newIds: string[];
   bestIds: string[];
+  initialCat?: string;
+  initialQ?: string;
+  reviews: { count: number; avg: number; items: ReviewItem[] };
 };
 
 function goShop() {
   document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-export default function Catalog({ products, categories, categoryImages, newIds, bestIds }: Props) {
+export default function Catalog({ products, categories, categoryImages, newIds, bestIds, initialCat, initialQ, reviews }: Props) {
   const { settings, mode, setMode, isDealer, profile, wish } = useStore();
-  const [cat, setCat] = useState("All");
-  const [q, setQ] = useState("");
+  const [cat, setCat] = useState(initialCat ?? "All");
+  const [q, setQ] = useState(initialQ ?? "");
   const [sort, setSort] = useState<"feat" | "lo" | "hi">("feat");
   const [limit, setLimit] = useState<number | null>(null);
   const [sheet, setSheet] = useState(false);
 
+  // Header links such as /#sale and /#saved open the shop already filtered.
+  useEffect(() => {
+    const apply = () => {
+      const h = window.location.hash;
+      if (h === "#saved" || h === "#sale") {
+        setCat(h === "#saved" ? SAVED : SALE);
+        setTimeout(goShop, 50);
+      } else if (h === "#new" || h === "#best") {
+        setTimeout(() => document.getElementById(h.slice(1))?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      } else if (h === "#shop") setTimeout(goShop, 50);
+    };
+    apply();
+    window.addEventListener("hashchange", apply);
+    return () => window.removeEventListener("hashchange", apply);
+  }, []);
+
+  const onSale = (p: CatalogProduct) => p.compare != null && p.compare > p.retail;
   const priceOf = (p: CatalogProduct) => (mode === "wholesale" && p.wholesale != null ? p.wholesale : p.retail);
   const top = useMemo(() => Math.max(1, ...products.map(priceOf)), [products, mode]); // eslint-disable-line react-hooks/exhaustive-deps
   const cap = limit ?? top;
@@ -45,7 +69,7 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
     const s = q.trim().toLowerCase();
     const out = products.filter(
       (p) =>
-        (cat === "All" || (cat === SAVED ? wish.includes(p.id) : p.category === cat)) &&
+        (cat === "All" || (cat === SAVED ? wish.includes(p.id) : cat === SALE ? onSale(p) : p.category === cat)) &&
         priceOf(p) <= cap &&
         (!s || `${p.name} ${p.category}`.toLowerCase().includes(s))
     );
@@ -58,11 +82,13 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
   const newest = newIds.map((id) => byId.get(id)).filter(Boolean) as CatalogProduct[];
   const best = bestIds.map((id) => byId.get(id)).filter(Boolean) as CatalogProduct[];
   const newSet = useMemo(() => new Set(newIds), [newIds]);
+  const saleItems = useMemo(() => products.filter(onSale).slice(0, 12), [products]); // eslint-disable-line react-hooks/exhaustive-deps
+  const saleCount = useMemo(() => products.filter(onSale).length, [products]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const wa = waNumber(settings.whatsapp);
   const savedCount = products.filter((p) => wish.includes(p.id)).length;
-  const all = ["All", ...(savedCount > 0 || cat === SAVED ? [SAVED] : []), ...categories];
-  const label = (c: string) => (c === SAVED ? "♥ Saved" : c);
+  const all = ["All", ...(saleCount > 0 || cat === SALE ? [SALE] : []), ...(savedCount > 0 || cat === SAVED ? [SAVED] : []), ...categories];
+  const label = (c: string) => (c === SAVED ? "♥ Saved" : c === SALE ? "% Sale" : c);
   const hero = cld(settings.hero_image, 1800);
 
   function pick(c: string) {
@@ -156,8 +182,9 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
         )}
 
         {/* New arrivals and best sellers */}
-        <Row title="New arrivals" items={newest} newSet={newSet} />
-        <Row title="Best sellers" items={best} newSet={newSet} />
+        <Row id="new" title="New arrivals" items={newest} newSet={newSet} />
+        <Row id="best" title="Best sellers" items={best} newSet={newSet} />
+        <Row id="sale" title="On sale" items={saleItems} newSet={newSet} />
 
         {/* Full shop */}
         <section id="shop" className="scroll-mt-20 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
@@ -188,7 +215,7 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
                       className={`flex items-center justify-between rounded-lg px-2.5 py-2 text-left ${cat === c ? "bg-panel2 text-gold-soft" : "text-muted hover:text-cream"}`}
                     >
                       {label(c)}
-                      <span className="text-[12.5px] tabular-nums">{c === "All" ? products.length : c === SAVED ? savedCount : counts[c] ?? 0}</span>
+                      <span className="text-[12.5px] tabular-nums">{c === "All" ? products.length : c === SAVED ? savedCount : c === SALE ? saleCount : counts[c] ?? 0}</span>
                     </button>
                   ))}
                 </div>
@@ -269,11 +296,35 @@ export default function Catalog({ products, categories, categoryImages, newIds, 
               ))}
               {!products.length && <Empty text="No products yet. Add your first piece from the admin panel." />}
               {products.length > 0 && !list.length && (
-                <Empty text={cat === SAVED ? "You have not saved anything yet. Tap the heart on a piece to save it." : "Nothing matches these filters. Clear the search or raise the price limit."} />
+                <Empty text={cat === SAVED ? "You have not saved anything yet. Tap the heart on a piece to save it." : cat === SALE ? "No pieces are on sale right now." : "Nothing matches these filters. Clear the search or raise the price limit."} />
               )}
             </div>
           </main>
         </section>
+
+        {reviews.count > 0 && (
+          <section className="mt-16" aria-label="Customer reviews">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
+              <h2 className="section-title">What customers say</h2>
+              <p className="text-sm text-muted">
+                <span className="text-gold">{"★".repeat(Math.round(reviews.avg))}</span>
+                <span className="text-line">{"★".repeat(5 - Math.round(reviews.avg))}</span> <b className="text-cream">{reviews.avg.toFixed(1)}</b> from {reviews.count} {reviews.count === 1 ? "review" : "reviews"}
+              </p>
+            </div>
+            <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-3">
+              {reviews.items.map((r) => (
+                <article key={r.id} className="card w-[280px] shrink-0 snap-start p-4">
+                  <div className="text-gold" aria-label={`${r.rating} out of 5 stars`}>{"★".repeat(r.rating)}<span className="text-line">{"★".repeat(5 - r.rating)}</span></div>
+                  {r.comment && <p className="mt-1.5 line-clamp-4 text-sm text-muted [overflow-wrap:anywhere]">{r.comment}</p>}
+                  <p className="mt-3 text-sm font-medium">{r.name}</p>
+                  {r.product && r.slug && <Link href={`/product/${r.slug}`} className="text-xs text-gold-soft underline">{r.product}</Link>}
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <Faq text={settings.faq} />
       </div>
     </>
   );
@@ -290,10 +341,10 @@ function Trust({ d, text }: { d: string; text: string }) {
   );
 }
 
-function Row({ title, items, newSet }: { title: string; items: CatalogProduct[]; newSet: Set<string> }) {
+function Row({ id, title, items, newSet }: { id: string; title: string; items: CatalogProduct[]; newSet: Set<string> }) {
   if (!items.length) return null;
   return (
-    <section className="mb-10" aria-label={title}>
+    <section id={id} className="mb-10 scroll-mt-24" aria-label={title}>
       <h2 className="section-title mb-4">{title}</h2>
       <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-3 md:gap-5">
         {items.map((p) => (

@@ -62,7 +62,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
             <tbody>
               {(items ?? []).map((i: any) => (
                 <tr key={i.id} className="border-b border-line">
-                  <td className="py-2.5 [overflow-wrap:anywhere]">{i.product_name}</td>
+                  <td className="py-2.5 [overflow-wrap:anywhere]">{i.product_name}{i.size ? ` (Size ${i.size})` : ""}</td>
                   <td className="py-2.5 text-right">{money(i.unit_price, cur)}</td>
                   <td className="py-2.5 text-right">{i.quantity}</td>
                   <td className="py-2.5 text-right">{money(i.line_total, cur)}</td>

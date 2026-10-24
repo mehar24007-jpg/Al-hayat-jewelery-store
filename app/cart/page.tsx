@@ -35,7 +35,7 @@ export default function CartPage() {
     setCity((v) => v || profile.city || "");
   }, [profile]);
 
-  const items = useMemo(() => cart.map((c) => ({ product_id: c.id, qty: c.qty })), [cart]);
+  const items = useMemo(() => cart.map((c) => ({ product_id: c.id, qty: c.qty, ...(c.size ? { size: c.size } : {}) })), [cart]);
 
   useEffect(() => {
     if (!items.length) {
@@ -59,7 +59,7 @@ export default function CartPage() {
     if (!quote) return "";
     const L = [`*${settings.store_name} ${settings.store_sub}: new order*`, `Mode: ${quote.mode === "wholesale" ? "Wholesale" : "Retail"}`, ""];
     quote.lines.forEach((l, i) => {
-      L.push(`${i + 1}. ${l.name}`, `   ${l.qty} x ${money(l.unit_price, cur)} = ${money(l.line_total, cur)}`);
+      L.push(`${i + 1}. ${l.name}${l.size ? ` (Size ${l.size})` : ""}`, `   ${l.qty} x ${money(l.unit_price, cur)} = ${money(l.line_total, cur)}`);
     });
     L.push("", `Total pieces: ${quote.lines.reduce((n, l) => n + l.qty, 0)}`);
     if (quote.discount > 0) L.push(`Discount: -${money(quote.discount, cur)}`);
@@ -124,7 +124,7 @@ export default function CartPage() {
           {(quote?.lines ?? []).map((l) => {
             const low = quote!.mode === "wholesale" && l.qty < l.moq;
             return (
-              <div key={l.product_id} className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line py-3.5">
+              <div key={`${l.product_id}|${l.size ?? ""}`} className="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line py-3.5">
                 <Link href={`/product/${l.slug}`} className="grid h-16 w-16 place-items-center overflow-hidden rounded-[10px]" style={{ background: toneBg(l.tone) }}>
                   {l.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -135,18 +135,19 @@ export default function CartPage() {
                 </Link>
                 <div className="min-w-0">
                   <Link href={`/product/${l.slug}`} className="block font-display text-lg font-semibold leading-tight [overflow-wrap:anywhere]">{l.name}</Link>
+                  {l.size && <span className="mr-2 rounded-full border border-line px-2 py-0.5 text-xs text-gold-soft">Size {l.size}</span>}
                   <span className="text-[12.5px] tabular-nums text-muted">
                     {money(l.unit_price, cur)} each{quote!.mode === "wholesale" ? ` · min ${l.moq}` : ""}
                   </span>
                   {low && <em className="block text-xs not-italic text-warn">Add {l.moq - l.qty} more to meet the minimum</em>}
                 </div>
                 <div className="inline-flex items-center rounded-lg border border-line">
-                  <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty - 1)} aria-label="Fewer">−</button>
+                  <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty - 1, l.size)} aria-label="Fewer">−</button>
                   <span className="min-w-7 text-center tabular-nums">{l.qty}</span>
-                  <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty + 1)} aria-label="More">+</button>
+                  <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty + 1, l.size)} aria-label="More">+</button>
                 </div>
                 <div className="col-span-3 flex items-center justify-between pl-[76px]">
-                  <button className="text-[12.5px] text-muted underline" onClick={() => remove(l.product_id)}>Remove</button>
+                  <button className="text-[12.5px] text-muted underline" onClick={() => remove(l.product_id, l.size)}>Remove</button>
                   <strong className="tabular-nums text-gold-soft">{money(l.line_total, cur)}</strong>
                 </div>
               </div>

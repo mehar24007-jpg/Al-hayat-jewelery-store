@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Profile, Settings } from "./types";
 
-export type CartItem = { id: string; qty: number };
+export type CartItem = { id: string; qty: number; size?: string };
+const same = (x: CartItem, id: string, size?: string | null) => x.id === id && (x.size ?? "") === (size ?? "");
 type Mode = "retail" | "wholesale";
 
 type Ctx = {
@@ -11,13 +12,14 @@ type Ctx = {
   profile: Profile;
   email: string | null;
   isDealer: boolean;
+  hasSale: boolean;
   mode: Mode;
   setMode: (m: Mode) => void;
   cart: CartItem[];
   count: number;
-  add: (id: string, qty: number) => void;
-  setQty: (id: string, qty: number) => void;
-  remove: (id: string) => void;
+  add: (id: string, qty: number, size?: string | null) => void;
+  setQty: (id: string, qty: number, size?: string | null) => void;
+  remove: (id: string, size?: string | null) => void;
   clear: () => void;
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
@@ -37,11 +39,13 @@ export function StoreProvider({
   settings,
   profile,
   email,
+  hasSale = false,
   children,
 }: {
   settings: Settings;
   profile: Profile;
   email: string | null;
+  hasSale?: boolean;
   children: ReactNode;
 }) {
   const isDealer = profile?.dealer_status === "approved";
@@ -95,19 +99,19 @@ export function StoreProvider({
     [isDealer]
   );
 
-  const add = useCallback((id: string, qty: number) => {
+  const add = useCallback((id: string, qty: number, size?: string | null) => {
     setCart((c) => {
-      const i = c.findIndex((x) => x.id === id);
-      if (i < 0) return [...c, { id, qty }];
+      const i = c.findIndex((x) => same(x, id, size));
+      if (i < 0) return [...c, size ? { id, qty, size } : { id, qty }];
       const n = [...c];
-      n[i] = { id, qty: n[i].qty + qty };
+      n[i] = { ...n[i], qty: n[i].qty + qty };
       return n;
     });
   }, []);
-  const setQty = useCallback((id: string, qty: number) => {
-    setCart((c) => (qty <= 0 ? c.filter((x) => x.id !== id) : c.map((x) => (x.id === id ? { id, qty } : x))));
+  const setQty = useCallback((id: string, qty: number, size?: string | null) => {
+    setCart((c) => (qty <= 0 ? c.filter((x) => !same(x, id, size)) : c.map((x) => (same(x, id, size) ? { ...x, qty } : x))));
   }, []);
-  const remove = useCallback((id: string) => setCart((c) => c.filter((x) => x.id !== id)), []);
+  const remove = useCallback((id: string, size?: string | null) => setCart((c) => c.filter((x) => !same(x, id, size))), []);
   const clear = useCallback(() => setCart([]), []);
 
   const value = useMemo<Ctx>(
@@ -116,6 +120,7 @@ export function StoreProvider({
       profile,
       email,
       isDealer,
+      hasSale,
       mode: isDealer ? mode : "retail",
       setMode,
       cart,
@@ -129,7 +134,7 @@ export function StoreProvider({
       wish,
       toggleWish,
     }),
-    [settings, profile, email, isDealer, mode, setMode, cart, add, setQty, remove, clear, cartOpen, wish, toggleWish]
+    [settings, profile, email, isDealer, hasSale, mode, setMode, cart, add, setQty, remove, clear, cartOpen, wish, toggleWish]
   );
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;

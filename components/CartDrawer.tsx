@@ -14,7 +14,7 @@ export default function CartDrawer() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const items = useMemo(() => cart.map((c) => ({ product_id: c.id, qty: c.qty })), [cart]);
+  const items = useMemo(() => cart.map((c) => ({ product_id: c.id, qty: c.qty, ...(c.size ? { size: c.size } : {}) })), [cart]);
 
   useEffect(() => {
     if (!cartOpen) return;
@@ -80,7 +80,7 @@ export default function CartDrawer() {
               {lines.map((l) => {
                 const low = quote!.mode === "wholesale" && l.qty < l.moq;
                 return (
-                  <div key={l.product_id} className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 border-b border-line py-4">
+                  <div key={`${l.product_id}|${l.size ?? ""}`} className="grid grid-cols-[64px_minmax(0,1fr)] gap-3 border-b border-line py-4">
                     <Link href={`/product/${l.slug}`} onClick={close} className="grid h-16 w-16 place-items-center overflow-hidden rounded-[10px]" style={{ background: toneBg(l.tone) }}>
                       {l.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -91,19 +91,20 @@ export default function CartDrawer() {
                     </Link>
                     <div className="min-w-0">
                       <Link href={`/product/${l.slug}`} onClick={close} className="block font-display text-lg font-semibold leading-tight [overflow-wrap:anywhere]">{l.name}</Link>
+                      {l.size && <span className="mr-2 rounded-full border border-line px-2 py-0.5 text-xs text-gold-soft">Size {l.size}</span>}
                       <div className="text-[12.5px] tabular-nums text-muted">
                         {money(l.unit_price, cur)} each{quote!.mode === "wholesale" ? ` · min ${l.moq}` : ""}
                       </div>
                       {low && <em className="block text-xs not-italic text-warn">Add {l.moq - l.qty} more to meet the minimum</em>}
                       <div className="mt-2 flex items-center justify-between">
                         <div className="inline-flex items-center rounded-lg border border-line">
-                          <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty - 1)} aria-label="Fewer">−</button>
+                          <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty - 1, l.size)} aria-label="Fewer">−</button>
                           <span className="min-w-7 text-center tabular-nums">{l.qty}</span>
-                          <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty + 1)} aria-label="More">+</button>
+                          <button className="h-8 w-8" onClick={() => setQty(l.product_id, l.qty + 1, l.size)} aria-label="More">+</button>
                         </div>
                         <strong className="tabular-nums text-gold-soft">{money(l.line_total, cur)}</strong>
                       </div>
-                      <button className="mt-1 text-[12.5px] text-muted underline" onClick={() => remove(l.product_id)}>Remove</button>
+                      <button className="mt-1 text-[12.5px] text-muted underline" onClick={() => remove(l.product_id, l.size)}>Remove</button>
                     </div>
                   </div>
                 );

@@ -30,9 +30,12 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
   const img = cld(p.image, 600);
   const img2 = cld(p.image2, 600);
   const saved = wish.includes(p.id);
+  const hasSizes = p.sizes.length > 0;
+  const sale = !wholesale && p.compare != null && p.compare > p.retail;
+  const off = sale ? Math.round((1 - p.retail / p.compare!) * 100) : 0;
 
   function onAdd() {
-    add(p.id, wholesale ? moq : 1);
+    add(p.id, wholesale ? moq : 1, null);
     setAdded(true);
     setCartOpen(true);
     setTimeout(() => setAdded(false), 1200);
@@ -62,7 +65,8 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
           <img src={img2} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-500 group-hover:opacity-100" loading="lazy" />
         )}
         <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-          {isNew && !soldOut && <span className={`${badge} text-gold-soft`}>New</span>}
+          {sale && !soldOut && <span className={`${badge} text-warn`}>{off}% off</span>}
+          {isNew && !soldOut && !sale && <span className={`${badge} text-gold-soft`}>New</span>}
           {p.tag && <span className={`${badge} text-gold-soft`}>{p.tag}</span>}
           {soldOut ? (
             <span className={`${badge} text-warn`}>Sold out</span>
@@ -90,11 +94,16 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
         <div className="flex flex-wrap items-baseline gap-x-2 tabular-nums">
           <span className="text-[17px] font-semibold text-gold-soft">{money(wholesale ? p.wholesale : p.retail, settings.currency)}</span>
           {wholesale && <span className="text-[12.5px] text-muted line-through">{money(p.retail, settings.currency)}</span>}
+          {sale && <span className="text-[12.5px] text-muted line-through">{money(p.compare, settings.currency)}</span>}
         </div>
         {wholesale && <div className="text-xs text-ok">Minimum {moq} pcs</div>}
-        <button className="btn mt-2.5 border-gold text-gold-soft hover:bg-gold hover:text-on-gold" onClick={onAdd} disabled={soldOut}>
-          {soldOut ? "Sold out" : added ? "Added" : wholesale ? `Add ${moq} to cart` : "Add to cart"}
-        </button>
+        {hasSizes && !soldOut ? (
+          <Link href={`/product/${p.slug}`} className="btn mt-2.5 border-gold text-gold-soft hover:bg-gold hover:text-on-gold">Select size</Link>
+        ) : (
+          <button className="btn mt-2.5 border-gold text-gold-soft hover:bg-gold hover:text-on-gold" onClick={onAdd} disabled={soldOut}>
+            {soldOut ? "Sold out" : added ? "Added" : wholesale ? `Add ${moq} to cart` : "Add to cart"}
+          </button>
+        )}
       </div>
     </article>
   );

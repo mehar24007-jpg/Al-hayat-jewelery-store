@@ -18,6 +18,14 @@ export type Settings = {
   instagram: string;
   address: string;
   theme: "gold" | "emerald" | "rose";
+  announcement: string;
+  shipping_policy: string;
+  exchange_policy: string;
+  care_text: string;
+  faq: string;
+  facebook: string;
+  tiktok: string;
+  youtube: string;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -40,6 +48,14 @@ export const DEFAULT_SETTINGS: Settings = {
   instagram: "",
   address: "",
   theme: "gold",
+  announcement: "",
+  shipping_policy: "",
+  exchange_policy: "",
+  care_text: "",
+  faq: "",
+  facebook: "",
+  tiktok: "",
+  youtube: "",
 };
 
 export type Profile = {
@@ -65,6 +81,8 @@ export type CatalogProduct = {
   tone: "gold" | "rose" | "silver";
   image: string | null;
   image2: string | null;
+  compare: number | null; // the old price, shown crossed out in retail mode
+  sizes: string[];
   stock: number;
   rating: number | null;
   reviews: number;
@@ -76,6 +94,7 @@ export type QuoteLine = {
   slug: string;
   image: string | null;
   tone: string;
+  size: string | null;
   unit_price: number;
   qty: number;
   moq: number;

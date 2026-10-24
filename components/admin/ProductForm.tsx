@@ -18,6 +18,8 @@ type Product = {
   is_active: boolean;
   images: string[];
   slabs: { min_qty: number; unit_price: number }[];
+  compare_at_price: number | "";
+  sizes: string;
 };
 
 export default function ProductForm({ product, categories, defaultMoq }: { product: Product; categories: { id: string; name: string }[]; defaultMoq: number }) {
@@ -47,6 +49,16 @@ export default function ProductForm({ product, categories, defaultMoq }: { produ
         <div>
           <label className="label" htmlFor="retail_price">Retail price</label>
           <input id="retail_price" name="retail_price" type="number" min={0} step="any" inputMode="decimal" className="input" defaultValue={product.retail_price} required />
+        </div>
+        <div>
+          <label className="label" htmlFor="compare_at_price">Old price (optional)</label>
+          <input id="compare_at_price" name="compare_at_price" type="number" min={0} step="any" inputMode="decimal" className="input" defaultValue={product.compare_at_price} placeholder="Shown crossed out, makes a Sale" />
+          <p className="note mt-1">Must be higher than the retail price. The shop shows the % off.</p>
+        </div>
+        <div>
+          <label className="label" htmlFor="sizes">Sizes (optional)</label>
+          <input id="sizes" name="sizes" className="input" defaultValue={product.sizes} placeholder="2.2, 2.4, 2.6, 2.8" />
+          <p className="note mt-1">Separate with commas. Customers must pick one. Leave empty for one size.</p>
         </div>
         <div>
           <label className="label" htmlFor="stock">Stock quantity</label>

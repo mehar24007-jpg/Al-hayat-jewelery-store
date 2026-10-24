@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import BottomNav from "@/components/BottomNav";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 import { StoreProvider } from "@/lib/store";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_SETTINGS, type Profile, type Settings } from "@/lib/types";
@@ -31,6 +33,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       }
     : DEFAULT_SETTINGS;
 
+  const { count: saleCount } = await sb.from("products").select("id", { count: "exact", head: true }).eq("is_active", true).not("compare_at_price", "is", null);
+
   const {
     data: { user },
   } = await sb.auth.getUser();
@@ -43,11 +47,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" data-theme={settings.theme} className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen bg-ink pb-16 font-body text-[15px] leading-relaxed text-cream md:pb-0">
-        <StoreProvider settings={settings} profile={profile} email={user?.email ?? null}>
+        <StoreProvider settings={settings} profile={profile} email={user?.email ?? null} hasSale={(saleCount ?? 0) > 0}>
+          <AnnouncementBar />
           <Header />
-          {children}
+          <div id="main">{children}</div>
           <Footer />
           <CartDrawer />
+          <WhatsAppFloat />
           <BottomNav />
         </StoreProvider>
       </body>
