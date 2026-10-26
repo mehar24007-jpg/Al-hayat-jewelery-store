@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FadeImg from "./FadeImg";
 import ProductArt, { toneBg } from "./ProductArt";
 import { cld, money } from "@/lib/format";
@@ -24,6 +24,30 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
   const { mode, settings, add, setCartOpen, wish, toggleWish } = useStore();
   const [added, setAdded] = useState(false);
   const [beat, setBeat] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const card = useRef<HTMLElement>(null);
+
+  // Cards fade up one after another as they scroll into view.
+  useEffect(() => {
+    const el = card.current;
+    if (!el || typeof IntersectionObserver === "undefined" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < window.innerHeight * 0.95) return;
+    const idx = Array.from(el.parentElement?.children ?? []).indexOf(el);
+    el.style.setProperty("--d", `${(idx % 4) * 80}ms`);
+    setHidden(true);
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setHidden(false);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const wholesale = mode === "wholesale" && p.wholesale != null;
   const moq = p.moq ?? settings.default_moq;
   const soldOut = p.stock <= 0;
@@ -48,13 +72,13 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
   }
 
   return (
-    <article className="reveal group relative flex min-w-0 flex-col overflow-hidden rounded-[14px] border border-line bg-panel transition duration-300 hover:-translate-y-1 hover:border-gold hover:shadow-xl">
-      <Link href={`/product/${p.slug}`} className="relative grid aspect-square place-items-center overflow-hidden" style={{ background: toneBg(p.tone) }}>
+    <article ref={card} className={`${hidden ? "card-hidden" : "card-in"} group relative flex min-w-0 flex-col overflow-hidden rounded-[14px] border border-line bg-panel transition duration-300 hover:-translate-y-1 hover:border-gold hover:shadow-xl active:scale-[.985]`}>
+      <Link href={`/product/${p.slug}`} className="shine relative grid aspect-square place-items-center overflow-hidden" style={{ background: toneBg(p.tone) }}>
         {img ? (
           <FadeImg
             src={img}
             alt={p.name}
-            className={`h-full w-full object-cover transition duration-500 ${img2 ? "group-hover:opacity-0" : "group-hover:scale-110"}`}
+            className={`h-full w-full object-cover transition duration-700 ease-out ${img2 ? "group-hover:scale-105 group-hover:opacity-0" : "group-hover:scale-110"}`}
             loading="lazy"
           />
         ) : (
@@ -62,7 +86,7 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
         )}
         {img2 && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={img2} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-500 group-hover:opacity-100" loading="lazy" />
+          <img src={img2} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-0 transition duration-700 ease-out group-hover:scale-100 group-hover:opacity-100" loading="lazy" />
         )}
         <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
           {sale && !soldOut && <span className={`${badge} text-warn`}>{off}% off</span>}
@@ -100,7 +124,7 @@ export default function ProductCard({ p, isNew = false }: { p: CatalogProduct; i
         {hasSizes && !soldOut ? (
           <Link href={`/product/${p.slug}`} className="btn mt-2.5 border-gold text-gold-soft hover:bg-gold hover:text-on-gold">Select size</Link>
         ) : (
-          <button className="btn mt-2.5 border-gold text-gold-soft hover:bg-gold hover:text-on-gold" onClick={onAdd} disabled={soldOut}>
+          <button className="btn mt-2.5 border-gold text-gold-soft hover:bg-gold hover:text-on-gold active:scale-95" onClick={onAdd} disabled={soldOut}>
             {soldOut ? "Sold out" : added ? "Added" : wholesale ? `Add ${moq} to cart` : "Add to cart"}
           </button>
         )}

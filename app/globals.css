@@ -115,8 +115,16 @@ img[data-load="1"]:not([class*="transition"]) { transition: filter .7s ease; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* Product cards: fade up when they scroll into view, and a light sweep over the photo on hover. */
+.card-hidden { opacity: 0; transform: translateY(26px) scale(.97); }
+.card-in { opacity: 1; transform: none; transition: opacity .6s cubic-bezier(.2,.7,.2,1) var(--d, 0ms), transform .6s cubic-bezier(.2,.7,.2,1) var(--d, 0ms), border-color .3s, box-shadow .3s; }
+.card-in:hover { transition-delay: 0ms; }
+.shine::after { content: ""; position: absolute; inset: 0; pointer-events: none; transform: translateX(-120%) skewX(-18deg); background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .22) 50%, transparent 65%); }
+.group:hover .shine::after { transform: translateX(120%) skewX(-18deg); transition: transform .9s ease; }
 @media (prefers-reduced-motion: reduce) {
   .reveal, .pop, .img-swap, .kenburns { animation: none; }
+  .card-hidden { opacity: 1; transform: none; }
+  .shine::after { display: none; }
   img[data-load="0"] { filter: none; }
   * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
